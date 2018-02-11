@@ -19,9 +19,9 @@ console.log(`Listening on localhost:${PORT}`);
 // pass in the http server into socketio and grab the websocket sever as io
 const io = socketio(app);
 
-let draws = {};
+const draws = {};
 
-const onJoined = sock => {
+const onJoined = (sock) => {
   const socket = sock;
 
   socket.on('join', () => {
@@ -31,10 +31,10 @@ const onJoined = sock => {
   });
 };
 
-const onUpdateServerStack = sock => {
+const onUpdateServerStack = (sock) => {
   const socket = sock;
 
-  socket.on('updateServerStack', data => {
+  socket.on('updateServerStack', (data) => {
     draws[data.time] = data.coords;
 
     io.sockets.in('room1').emit('updateClientStack', draws);
@@ -43,7 +43,7 @@ const onUpdateServerStack = sock => {
   });
 };
 
-const onDisconnect = sock => {
+const onDisconnect = (sock) => {
   const socket = sock;
 
   socket.on('disconnect', () => {
