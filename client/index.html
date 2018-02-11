@@ -2,12 +2,65 @@
 <html lang="en">
 <head>
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script type="text/babel" >
         "use strict";
-    
+
+        let draws = {};
+
+        const draw = (canvas, ctx) => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          let keys = Object.keys(draws);
+
+          keys.forEach(key => {
+            const drawCall = draws[key];
+
+            ctx.fillStyle = 'red';
+            ctx.fillRect(drawCall.x, drawCall.y, drawCall.width, drawCall.height);
+          });
+        };
+
+        const setCalls = (socket) => {
+          let x = Math.ceil(Math.random() * canvas.width);
+          let y = Math.floor(Math.random() * canvas.height);
+          const width = 100;
+          const height = 100;
+
+          let coords = {x, y, width, height};
+
+          let time = new Date().getTime();
+          draws[time] = coords;
+          socket.emit('updateServerStack', {time, coords});
+        };
+
+        const init = () => {
+
+          const canvas = document.querySelector('#canvas');
+          const ctx = canvas.getContext('2d');
+
+          const socket = io.connect();
+
+          socket.on('connect', () => {
+            socket.emit('join');
+            setCalls(socket);
+          });
+
+          socket.on('updateClientStack', data => {
+            draws = data;
+            console.dir(draws);
+            draw(canvas, ctx);
+          });
+
+          setInterval(() => {
+            setCalls(socket);
+          }, 5000);
+        };
+
+        window.onload = init;
     </script>
 </head>
 <body>
-
+<canvas id="canvas" width="1200" height="500"></canvas>
 </body>
 </html>
